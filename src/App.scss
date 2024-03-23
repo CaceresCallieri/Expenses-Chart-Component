@@ -170,6 +170,10 @@ $very-pale-orange: hsl(33, 100%, 98%);
       &:hover {
         background-color: $pale-orange;
       }
+
+      &:active {
+        transform: scale(0.95);
+      }
     }
   }
 }
@@ -233,10 +237,6 @@ $very-pale-orange: hsl(33, 100%, 98%);
       button {
         font-size: 1rem;
         padding: 0.75rem;
-
-        &:active {
-          transform: scale(0.95);
-        }
 
         &:hover {
           background-color: $soft-red;

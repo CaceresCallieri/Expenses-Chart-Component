@@ -1,31 +1,19 @@
-import { useState } from 'react'
 import './App.css'
-import initialData from './utils/datatest.js'
+import { useState, useMemo } from 'react'
 
-function createNewWeekData() {
-  const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-  const week =
-    days.map(day => {
-      return {
-        "day": day,
-        "amount": Number((Math.random() * 100).toFixed(2))
-      }
-    })
+import Day from './components/Day.jsx'
 
-  const data = {
-    "balance": Number((Math.random() * 1000).toFixed(2)),
-    "week": week
-  }
-
-  return data
-}
+import initialData from './utils/data.js'
+import createNewWeekData from './utils/createNewWeekData.js'
 
 function App() {
   const [data, setData] = useState(initialData)
-  const [prevTotal, setPrevTotal] = useState(222.60) // hardcoded value for the first week to acomodate for the original design
   const { balance, week } = data
+  const [prevTotal, setPrevTotal] = useState(222.60) // hardcoded value for the first week to acomodate for the original design
 
-  function getMostExpensiveDaysIndices() {
+  const weekTotal = useMemo(() => (week.reduce((acc, item) => acc + item.amount, 0)).toFixed(2), [week])
+
+  function getMostExpensiveDaysIndices() { // returns an array with the indices of the most expensive days, to account for the rare case of multiple days with the same amount
     const mostExpensiveDayAmount = Math.max(...week.map(item => item.amount))
     const mostExpensiveDayIndices = week
       .map((item, index) => item.amount === mostExpensiveDayAmount ? index : -1)
@@ -33,13 +21,15 @@ function App() {
     return mostExpensiveDayIndices
   }
 
+  const mostExpensiveDayIndices = useMemo(getMostExpensiveDaysIndices, [week]) // useMemo to avoid recalculating the most expensive days on every render, only when the week data changes
+
   function isMostExpensiveDay(index) {
-    return getMostExpensiveDaysIndices().includes(index)
+    return mostExpensiveDayIndices.includes(index)
   }
-  
-  function getWeekTotal() {
-    const total = week.reduce((acc, item) => acc + Number(item.amount), 0)
-    return total.toFixed(2)
+
+  function handleButtonClick() {
+    setPrevTotal(weekTotal)
+    setData(createNewWeekData())
   }
 
   return (
@@ -57,31 +47,29 @@ function App() {
         <div className="graph">
           {week.map((item, index) => {
             return (
-              <div className='day-info' key={index}>
-                <div className={`bar ${isMostExpensiveDay(index) && 'longest'}`} style={{ height: (item.amount * 2) }}></div>
-                <p className='amount'>${item.amount}</p>
-                <p className='day'>{item.day}</p>
-              </div>
+              <>
+                <Day item={item} index={index} isMostExpensiveDay={isMostExpensiveDay} />
+              </>
             )
           })}
         </div>
 
         <div className="divider"></div>
 
-          <div className="bottom">
-            <div className="total">
-              <p>Total this week</p>
-              <h2>${getWeekTotal()}</h2>
-            </div>
-
-              <div className="performance">
-                <h4>{(((getWeekTotal() - prevTotal) / prevTotal) * 100).toFixed(1)}%</h4>
-                <p>from last week</p>
-              </div>
+        <div className="bottom">
+          <div className="total">
+            <p>Total this week</p>
+            <h2>${weekTotal}</h2>
           </div>
-        </article>
 
-      <button onClick={() => { setData(createNewWeekData()); setPrevTotal(getWeekTotal()) }}>Next week</button>
+          <div className="performance">
+            <h4>{(((weekTotal - prevTotal) / prevTotal) * 100).toFixed(1)}%</h4>
+            <p>from last week</p>
+          </div>
+        </div>
+      </article>
+
+      <button onClick={handleButtonClick}>Next week</button>
     </main>
   )
 }

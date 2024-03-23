@@ -127,6 +127,9 @@
 #root main button:hover {
   background-color: #FF9B86;
 }
+#root main button:active {
+  transform: scale(0.95);
+}
 
 @media (width <= 560px) {
   #root main {
@@ -168,9 +171,6 @@
   #root main button {
     font-size: 1rem;
     padding: 0.75rem;
-  }
-  #root main button:active {
-    transform: scale(0.95);
   }
   #root main button:hover {
     background-color: hsl(10, 79%, 65%);
